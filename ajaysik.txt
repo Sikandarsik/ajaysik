@@ -1,0 +1,57 @@
+import streamlit as st
+import random
+
+# Set Page Config (The "Attractive" part)
+st.set_page_config(page_title="Billionaire Logic Game", page_icon="??", layout="centered")
+
+# Custom CSS for the Background
+st.markdown("""
+    <style>
+    .stApp {
+        background: linear-gradient(to right, #1e3c72, #2a5298);
+        color: white;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+st.title("?? The Secret Code Game")
+st.write("Guess the word to unlock the next level of the empire.")
+
+# Session State (to remember the game status)
+if 'secret_word' not in st.session_state:
+    st.session_state.secret_word = random.choice(["python", "billion", "agent", "binary", "system", "engine"])
+    st.session_state.guesses = ""
+    st.session_state.turns = 6
+
+# Game Logic Display
+display_word = ""
+for char in st.session_state.secret_word:
+    if char in st.session_state.guesses:
+        display_word += char + " "
+    else:
+        display_word += "_ "
+
+st.header(display_word)
+
+# User Input
+guess = st.text_input("Enter a letter:", max_chars=1).lower()
+
+if st.button("Submit Guess"):
+    if guess and guess not in st.session_state.guesses:
+        st.session_state.guesses += guess
+        if guess not in st.session_state.secret_word:
+            st.session_state.turns -= 1
+            st.error(f"Wrong! Turns remaining: {st.session_state.turns}")
+        else:
+            st.success("Good guess!")
+    
+    if all(char in st.session_state.guesses for char in st.session_state.secret_word):
+        st.balloons()
+        st.write(f"### ?? WINNER! The word was {st.session_state.secret_word}")
+        if st.button("Play Again"):
+            st.session_state.clear()
+    
+    if st.session_state.turns <= 0:
+        st.write(f"Game Over! The word was {st.session_state.secret_word}")
+        if st.button("Restart"):
+            st.session_state.clear()
